@@ -34,3 +34,6 @@ build/
 
 #NDK
 obj/
+
+# Ignoring class which contains APIKEYS
+**/utilities/CredentialUtils.java
