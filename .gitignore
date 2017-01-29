@@ -36,4 +36,4 @@ build/
 obj/
 
 # Ignoring class which contains APIKEYS
-**/utilities/CredentialUtils.java
+**/CredentialUtils.java
