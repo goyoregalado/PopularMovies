@@ -21,7 +21,9 @@ public class TheMovieDBUtils {
 
     private static final String POPULAR_BASE_URL = "https://api.themoviedb.org/3/movie/popular";
     private static final String TOP_RATED_BASE_URL = "https://api.themoviedb.org/3/movie/top_rated";
+    private static final String PICTURE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String API_KEY_QUERY_PARAM = "api_key";
+    private static final String PICTURE_DEFAULT_SIZE = "w185";
 
     /**
      * This method will build the URL used to query TheMovieDB service.
@@ -30,7 +32,7 @@ public class TheMovieDBUtils {
      *                      If contains "topRated" then we should query the top rated movies.
      * @return The URL to use to query the MovieDB server.
     */
-    public static URL buildURL(String typeOfQuery) {
+    public static URL buildMovieURL(String typeOfQuery) {
         Uri builtUri=null;
 
         switch (typeOfQuery) {
@@ -38,12 +40,14 @@ public class TheMovieDBUtils {
                 builtUri = Uri.parse(POPULAR_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
+                Log.v(TAG, "Fetching popular movies");
                 break;
 
             case "topRated":
                 builtUri = Uri.parse(TOP_RATED_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
+                Log.v(TAG, "Fetching top rated movies");
                 break;
         }
 
@@ -55,6 +59,24 @@ public class TheMovieDBUtils {
         }
 
         Log.v(TAG, "Built URL: " + url);
+        return url;
+    }
+
+
+    public static URL buildPictureURL(String picturePath) {
+        Uri builtUri = Uri.parse(PICTURE_BASE_URL).buildUpon()
+                .appendEncodedPath(PICTURE_DEFAULT_SIZE)
+                .appendEncodedPath(picturePath)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Log.v(TAG, "Built image URL: " + url);
         return url;
     }
 
