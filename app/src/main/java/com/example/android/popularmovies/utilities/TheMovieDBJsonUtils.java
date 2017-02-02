@@ -2,6 +2,8 @@ package com.example.android.popularmovies.utilities;
 
 import android.content.Context;
 
+import com.example.android.popularmovies.Movie;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,40 +13,39 @@ import org.json.JSONObject;
  */
 
 public class TheMovieDBJsonUtils  {
+    final static String TMDB_RESULTS = "results";
 
+    final static String TMDB_POSTER = "poster_path";
+
+    final static String TMDB_ADULT = "adult";
+
+    final static String TMDB_OVERVIEW = "overview";
+
+    final static String TMDB_RELEASE_DATE = "release_date";
+
+    final static String TMDB_GENRE_IDS = "genre_ids";
+
+    final static String TMDB_ID = "id";
+
+    final static String TMDB_ORIGINAL_TITLE = "original_title";
+
+    final static String TMDB_ORIGINAL_LANGUAGE = "original_language";
+
+    final static String TMDB_TITLE = "title";
+
+    final static String TMDB_BACKDROP = "backdrop_path";
+
+    final static String TMDB_POPULARITY = "popularity";
+
+    final static String TMDB_VOTES = "vote_count";
+
+    final static String TMDB_VIDEO = "video";
+
+    final static String TMDB_VOTE_AVERAGE = "vote_average";
 
     public static String[] getMovieStringsFromJSON(String moviesJsonStr) throws JSONException {
-        final String TMDB_RESULTS = "results";
 
-        final String TMDB_POSTER = "poster_path";
-
-        final String TMDB_ADULT = "adult";
-
-        final String TMDB_OVERVIEW = "overview";
-
-        final String TMDB_RELEASE_DATE = "release_date";
-
-        final String TMDB_GENRE_IDS = "genre_ids";
-
-        final String TMDB_ID = "id";
-
-        final String TMDB_ORIGINAL_TITLE = "original_title";
-
-        final String TMDB_ORIGINAL_LANGUAGE = "original_language";
-
-        final String TMDB_TITLE = "title";
-
-        final String TMDB_BACKDROP = "backdrop_path";
-
-        final String TMDB_POPULARITY = "popularity";
-
-        final String TMDB_VOTES = "vote_count";
-
-        final String TMDB_VIDEO = "video";
-
-        final String TMDB_VOTE_AVERAGE = "vote_average";
-
-        String[] mParsedPosterPaths= null;
+        String[] mParsedPosterPaths = null;
 
         JSONObject moviesJSON = new JSONObject(moviesJsonStr);
 
@@ -61,5 +62,34 @@ public class TheMovieDBJsonUtils  {
             mParsedPosterPaths[i] = movie.getString(TMDB_POSTER);
         }
         return mParsedPosterPaths;
+    }
+
+
+    public static Movie[] getMovieArrayFromJSON(String moviesJSONStr) throws JSONException {
+
+        Movie[] moviesParsedArray = null;
+
+        JSONObject moviesJSON = new JSONObject(moviesJSONStr);
+
+        if (!moviesJSON.has(TMDB_RESULTS)) {
+            return null;
+        }
+
+        JSONArray moviesArray = moviesJSON.getJSONArray(TMDB_RESULTS);
+
+        moviesParsedArray = new Movie[moviesArray.length()];
+
+        for (int i = 0; i < moviesArray.length(); i++) {
+            JSONObject movie = moviesArray.getJSONObject(i);
+
+            String title = movie.getString(TMDB_ORIGINAL_TITLE);
+            String posterPath = movie.getString(TMDB_POSTER);
+            String synopsis = movie.getString(TMDB_OVERVIEW);
+            double rating = movie.getDouble(TMDB_VOTE_AVERAGE);
+            String releaseDate = movie.getString(TMDB_RELEASE_DATE);
+            
+            moviesParsedArray[i] = new Movie(title, posterPath, synopsis, rating, releaseDate);
+        }
+        return moviesParsedArray;
     }
 }

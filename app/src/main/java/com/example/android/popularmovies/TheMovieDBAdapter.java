@@ -19,11 +19,7 @@ import java.net.URL;
 public class TheMovieDBAdapter extends
         RecyclerView.Adapter<TheMovieDBAdapter.TheMovieDBAdapterViewHolder>{
 
-    private String mMoviesData[];
-
-    /*public TheMovieDBAdapter() {
-
-    }*/
+    private Movie mMoviesData[];
 
     @Override
     public TheMovieDBAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,13 +50,13 @@ public class TheMovieDBAdapter extends
 
     @Override
     public void onBindViewHolder(TheMovieDBAdapterViewHolder holder, int position) {
-        URL pictureUrl = TheMovieDBUtils.buildPictureURL(mMoviesData[position]);
+        URL pictureUrl = TheMovieDBUtils.buildPictureURL(mMoviesData[position].posterPath);
 
         Picasso.with(holder.mPosterImageView.getContext())
                 .load(pictureUrl.toString()).into(holder.mPosterImageView);
     }
 
-    public void setMovieData(String[] movieData) {
+    public void setMovieData(Movie[] movieData) {
         mMoviesData = movieData;
         notifyDataSetChanged();
     }
