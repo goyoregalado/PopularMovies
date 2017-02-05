@@ -33,7 +33,7 @@ public class MovieArrayAdapter extends ArrayAdapter<Movie> {
         }
         ImageView poster = (ImageView) convertView.findViewById(R.id.iv_poster);
 
-        URL pictureUrl = TheMovieDBUtils.buildPictureURL(getItem(position).posterPath);
+        URL pictureUrl = TheMovieDBUtils.buildPictureURL(getItem(position).posterURL);
 
         Picasso.with(getContext())
                 .load(pictureUrl.toString()).into(poster);

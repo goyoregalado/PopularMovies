@@ -83,12 +83,12 @@ public class TheMovieDBJsonUtils  {
             JSONObject movie = moviesArray.getJSONObject(i);
 
             String title = movie.getString(TMDB_ORIGINAL_TITLE);
-            String posterPath = movie.getString(TMDB_POSTER);
+            String posterURL = TheMovieDBUtils.buildPictureURL(movie.getString(TMDB_POSTER)).toString();
             String synopsis = movie.getString(TMDB_OVERVIEW);
             double rating = movie.getDouble(TMDB_VOTE_AVERAGE);
             String releaseDate = movie.getString(TMDB_RELEASE_DATE);
             
-            moviesParsedArray[i] = new Movie(title, posterPath, synopsis, rating, releaseDate);
+            moviesParsedArray[i] = new Movie(title, posterURL, synopsis, rating, releaseDate);
         }
         return moviesParsedArray;
     }

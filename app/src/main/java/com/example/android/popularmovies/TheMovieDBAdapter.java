@@ -20,6 +20,15 @@ public class TheMovieDBAdapter extends
         RecyclerView.Adapter<TheMovieDBAdapter.TheMovieDBAdapterViewHolder>{
 
     private Movie mMoviesData[];
+    final private TheMovieDBAdapterOnClickHandler mClickHandler;
+
+    interface TheMovieDBAdapterOnClickHandler {
+        void onMovieClick(Movie movie);
+    }
+
+    public TheMovieDBAdapter(TheMovieDBAdapterOnClickHandler clickHandler) {
+        mClickHandler = clickHandler;
+    }
 
     @Override
     public TheMovieDBAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -50,10 +59,10 @@ public class TheMovieDBAdapter extends
 
     @Override
     public void onBindViewHolder(TheMovieDBAdapterViewHolder holder, int position) {
-        URL pictureUrl = TheMovieDBUtils.buildPictureURL(mMoviesData[position].posterPath);
+        String pictureUrl = mMoviesData[position].posterURL;
 
         Picasso.with(holder.mPosterImageView.getContext())
-                .load(pictureUrl.toString()).into(holder.mPosterImageView);
+                .load(pictureUrl).into(holder.mPosterImageView);
     }
 
     public void setMovieData(Movie[] movieData) {
@@ -61,13 +70,23 @@ public class TheMovieDBAdapter extends
         notifyDataSetChanged();
     }
 
-    class TheMovieDBAdapterViewHolder extends RecyclerView.ViewHolder {
+    public Movie[] getMovieData() {
+        return mMoviesData;
+    }
+
+    class TheMovieDBAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         ImageView mPosterImageView;
 
         public TheMovieDBAdapterViewHolder(View view) {
             super(view);
             mPosterImageView = (ImageView) view.findViewById(R.id.iv_poster);
+            view.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            mClickHandler.onMovieClick(mMoviesData[position]);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.os.AsyncTask;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.popularmovies.utilities.TheMovieDBJsonUtils;
 import com.example.android.popularmovies.utilities.TheMovieDBUtils;
@@ -18,7 +20,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter.TheMovieDBAdapterOnClickHandler {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
@@ -28,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
+
+    private Toast mToast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,15 +55,31 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setHasFixedSize(true);
 
 
-        mMovieAdapter = new TheMovieDBAdapter();
+        mMovieAdapter = new TheMovieDBAdapter(this);
 
         mRecyclerView.setAdapter(mMovieAdapter);
 
+        if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
+            Log.v(TAG, "There isn't any movie data so, look for that in Internet");
+            loadMoviePosters();
+            Log.v(TAG, "We should be looking at a lot of posters");
 
-        loadMoviePosters();
+        }
+        else {
+            Log.v(TAG, "Restoring movie data");
+            mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.v(TAG, "I'm saving the data.");
+        outState.putParcelableArray("movieList", mMovieAdapter.getMovieData());
+        super.onSaveInstanceState(outState);
     }
 
     public void loadMoviePosters(){
+
         new FetchMovies().execute("popular");
     }
 
@@ -73,6 +93,15 @@ public class MainActivity extends AppCompatActivity {
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onMovieClick(Movie movie) {
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(this, movie.originalTitle, Toast.LENGTH_LONG);
+        mToast.show();
+
+    }
 
     class FetchMovies extends AsyncTask<String, Void, Movie[]> {
 
