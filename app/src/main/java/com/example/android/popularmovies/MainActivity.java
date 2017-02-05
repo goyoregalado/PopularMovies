@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,6 +26,11 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
+    private static final String POPULAR_CRITERIA = "popular";
+    private static final String RATING_CRITERIA = "topRated";
+
+
+    private String defaultCriteria = POPULAR_CRITERIA;
 
     private RecyclerView mRecyclerView;
     private TheMovieDBAdapter mMovieAdapter;
@@ -61,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
             Log.v(TAG, "There isn't any movie data so, look for that in Internet");
-            loadMoviePosters();
+            loadMoviePosters(defaultCriteria);
             Log.v(TAG, "We should be looking at a lot of posters");
 
         }
@@ -78,9 +85,30 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
         super.onSaveInstanceState(outState);
     }
 
-    public void loadMoviePosters(){
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.movies, menu);
+        return true;
+    }
 
-        new FetchMovies().execute("popular");
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemSelected = item.getItemId();
+
+        switch (itemSelected) {
+            case R.id.action_most_popular:
+                loadMoviePosters(POPULAR_CRITERIA);
+                return true;
+            case R.id.action_top_rated:
+                loadMoviePosters(RATING_CRITERIA);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void loadMoviePosters(String sorting_criteria){
+
+        new FetchMovies().execute(sorting_criteria);
     }
 
     void showMoviePosters() {

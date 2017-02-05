@@ -24,6 +24,8 @@ public class TheMovieDBUtils {
     private static final String PICTURE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String API_KEY_QUERY_PARAM = "api_key";
     private static final String PICTURE_DEFAULT_SIZE = "w185";
+    private static final String POPULAR_CRITERIA = "popular";
+    private static final String RATING_CRITERIA = "topRated";
 
     /**
      * This method will build the URL used to query TheMovieDB service.
@@ -36,14 +38,14 @@ public class TheMovieDBUtils {
         Uri builtUri=null;
 
         switch (typeOfQuery) {
-            case "popular":
+            case POPULAR_CRITERIA:
                 builtUri = Uri.parse(POPULAR_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
                 Log.v(TAG, "Fetching popular movies");
                 break;
 
-            case "topRated":
+            case RATING_CRITERIA:
                 builtUri = Uri.parse(TOP_RATED_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();

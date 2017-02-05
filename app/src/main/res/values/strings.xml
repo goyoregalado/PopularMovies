@@ -2,4 +2,6 @@
     <string name="app_name">PopularMovies</string>
     <string name="error_message">An error ocurred</string>
     <string name="poster_description">This is an image wich contains a movie\'s poster</string>
+    <string name="most_popular">Most popular</string>
+    <string name="top_rated">Top rated</string>
 </resources>
