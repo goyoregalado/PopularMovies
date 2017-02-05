@@ -66,6 +66,8 @@ public class TheMovieDBAdapter extends
     }
 
     public void setMovieData(Movie[] movieData) {
+        mMoviesData = null;
+        mMoviesData = new Movie[movieData.length];
         mMoviesData = movieData;
         notifyDataSetChanged();
     }

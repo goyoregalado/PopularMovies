@@ -1,5 +1,7 @@
 package com.example.android.popularmovies;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.utilities.PopularMoviesSettings;
 import com.example.android.popularmovies.utilities.TheMovieDBJsonUtils;
 import com.example.android.popularmovies.utilities.TheMovieDBUtils;
 
@@ -26,11 +29,7 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
-    private static final String POPULAR_CRITERIA = "popular";
-    private static final String RATING_CRITERIA = "topRated";
 
-
-    private String defaultCriteria = POPULAR_CRITERIA;
 
     private RecyclerView mRecyclerView;
     private TheMovieDBAdapter mMovieAdapter;
@@ -68,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
             Log.v(TAG, "There isn't any movie data so, look for that in Internet");
-            loadMoviePosters(defaultCriteria);
+            loadMoviePosters(PopularMoviesSettings.POPULAR_CRITERIA);
             Log.v(TAG, "We should be looking at a lot of posters");
 
         }
@@ -97,10 +96,10 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
         switch (itemSelected) {
             case R.id.action_most_popular:
-                loadMoviePosters(POPULAR_CRITERIA);
+                loadMoviePosters(PopularMoviesSettings.POPULAR_CRITERIA);
                 return true;
             case R.id.action_top_rated:
-                loadMoviePosters(RATING_CRITERIA);
+                loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -123,12 +122,11 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
     @Override
     public void onMovieClick(Movie movie) {
-        if (mToast != null) {
-            mToast.cancel();
-        }
-        mToast = Toast.makeText(this, movie.originalTitle, Toast.LENGTH_LONG);
-        mToast.show();
-
+        Context context = this;
+        Class detailActivityClass = MovieDetailActivity.class;
+        Intent intent = new Intent(context, detailActivityClass);
+        intent.putExtra("movie", movie);
+        startActivity(intent);
     }
 
     class FetchMovies extends AsyncTask<String, Void, Movie[]> {
@@ -147,8 +145,6 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
                 Log.d(TAG, "Looking for a response");
                 String response = TheMovieDBUtils.getResponseFromHttpsUrl(url);
                 Log.d(TAG, "That's is: " + response);
-                //String[] parsedResponse = TheMovieDBJsonUtils.getMovieStringsFromJSON(response);
-                //Log.v(TAG, "Number of loaded movies: " + parsedResponse.length);
                 Movie[] parsedResponse = TheMovieDBJsonUtils.getMovieArrayFromJSON(response);
                 return parsedResponse;
             }
@@ -156,8 +152,9 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
                 e.printStackTrace();
                 return null;
             }
-            catch (JSONException e) {
-                e.printStackTrace();
+            catch (JSONException e2) {
+                e2.printStackTrace();
+                Log.v(TAG, "Que pasa aqui...");
                 return null;
             }
         }
@@ -166,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
         protected void onPostExecute(Movie[] movies) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movies != null) {
+                Log.v(TAG, "Showing movie posters");
                 showMoviePosters();
                 mMovieAdapter.setMovieData(movies);
             }

@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -24,8 +27,6 @@ public class TheMovieDBUtils {
     private static final String PICTURE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String API_KEY_QUERY_PARAM = "api_key";
     private static final String PICTURE_DEFAULT_SIZE = "w185";
-    private static final String POPULAR_CRITERIA = "popular";
-    private static final String RATING_CRITERIA = "topRated";
 
     /**
      * This method will build the URL used to query TheMovieDB service.
@@ -38,14 +39,14 @@ public class TheMovieDBUtils {
         Uri builtUri=null;
 
         switch (typeOfQuery) {
-            case POPULAR_CRITERIA:
+            case PopularMoviesSettings.POPULAR_CRITERIA:
                 builtUri = Uri.parse(POPULAR_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
                 Log.v(TAG, "Fetching popular movies");
                 break;
 
-            case RATING_CRITERIA:
+            case PopularMoviesSettings.RATING_CRITERIA:
                 builtUri = Uri.parse(TOP_RATED_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
@@ -102,5 +103,17 @@ public class TheMovieDBUtils {
         finally {
             urlConnection.disconnect();
         }
+    }
+
+    public static Date parseDate(String dateStr) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = null;
+        try {
+            date = format.parse(dateStr);
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 }
