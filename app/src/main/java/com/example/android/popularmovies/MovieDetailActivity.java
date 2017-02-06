@@ -35,7 +35,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         if (intent.getExtras().getParcelable("movie") != null) {
-            Movie movie = (Movie) intent.getExtras().getParcelable("movie");
+            Movie movie = intent.getExtras().getParcelable("movie");
             mOriginalTitle.setText(movie.originalTitle);
 
             Date date = TheMovieDBUtils.parseDate(movie.releaseDate);
@@ -54,4 +54,5 @@ public class MovieDetailActivity extends AppCompatActivity {
             Picasso.with(this).load(movie.posterURL).into(mMoviePoster);
         }
     }
+
 }

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 /**
  * Created by goyo on 1/2/17.
+ * Utility class to work with the JSON format of The Movie DB API.
  */
 
 public class TheMovieDBJsonUtils  {
@@ -43,9 +44,16 @@ public class TheMovieDBJsonUtils  {
 
     final static String TMDB_VOTE_AVERAGE = "vote_average";
 
+
+    /**
+     * This class obtains a list of movie poster paths from the raw response retrieved from the API.
+     * @param moviesJsonStr A String with the raw response from the API.
+     * @return An String array in which positions is stored just one movie poster path.
+     * @throws JSONException
+     */
     public static String[] getMovieStringsFromJSON(String moviesJsonStr) throws JSONException {
 
-        String[] mParsedPosterPaths = null;
+        String[] mParsedPosterPaths;
 
         JSONObject moviesJSON = new JSONObject(moviesJsonStr);
 
@@ -64,10 +72,16 @@ public class TheMovieDBJsonUtils  {
         return mParsedPosterPaths;
     }
 
+    /**
+     * Returns a array of parcelable Movie objects
+     * @param moviesJSONStr A String with the raw response from the API.
+     * @return An array of parcelable Movie objects.
+     * @throws JSONException
+     */
 
     public static Movie[] getMovieArrayFromJSON(String moviesJSONStr) throws JSONException {
 
-        Movie[] moviesParsedArray = null;
+        Movie[] moviesParsedArray;
 
         JSONObject moviesJSON = new JSONObject(moviesJSONStr);
 

@@ -16,6 +16,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by goyo on 29/1/17.
+ * This class is used to retrieve movie data from The Movie DB API.
  */
 
 public class TheMovieDBUtils {
@@ -31,8 +32,7 @@ public class TheMovieDBUtils {
     /**
      * This method will build the URL used to query TheMovieDB service.
      *
-     * @String typeOfQuery  If contains "popular" then we should query the popular movies.
-     *                      If contains "topRated" then we should query the top rated movies.
+     * @String typeOfQuery It can be one of the values stored at PopularMoviesSettings class.
      * @return The URL to use to query the MovieDB server.
     */
     public static URL buildMovieURL(String typeOfQuery) {
@@ -43,14 +43,14 @@ public class TheMovieDBUtils {
                 builtUri = Uri.parse(POPULAR_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
-                Log.v(TAG, "Fetching popular movies");
+                Log.i(TAG, "Fetching popular movies");
                 break;
 
             case PopularMoviesSettings.RATING_CRITERIA:
                 builtUri = Uri.parse(TOP_RATED_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
                         .build();
-                Log.v(TAG, "Fetching top rated movies");
+                Log.i(TAG, "Fetching top rated movies");
                 break;
         }
 
@@ -59,13 +59,18 @@ public class TheMovieDBUtils {
             url = new URL(builtUri.toString());
         } catch (MalformedURLException e){
             e.printStackTrace();
+            Log.e(TAG, "Malformed URL");
         }
 
-        Log.v(TAG, "Built URL: " + url);
+        Log.i(TAG, "Built URL: " + url);
         return url;
     }
 
-
+    /**
+     * This method will build a full picture URL from the path retrieved from the API.
+     * @param picturePath The poster path obtained from the API.
+     * @return A full picture URL.
+     */
     public static URL buildPictureURL(String picturePath) {
         Uri builtUri = Uri.parse(PICTURE_BASE_URL).buildUpon()
                 .appendEncodedPath(PICTURE_DEFAULT_SIZE)
@@ -83,6 +88,12 @@ public class TheMovieDBUtils {
         return url;
     }
 
+    /**
+     * Obtains the data from a Https url.
+     * @param url The url from we are going to get the data.
+     * @return An String with the response obtained from the server.
+     * @throws IOException
+     */
     public static String getResponseFromHttpsUrl(URL url) throws IOException {
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
 
@@ -105,6 +116,11 @@ public class TheMovieDBUtils {
         }
     }
 
+    /**
+     * This just converts an String in the format provided by The Movie DB API into a Date object.
+     * @param dateStr
+     * @return
+     */
     public static Date parseDate(String dateStr) {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;

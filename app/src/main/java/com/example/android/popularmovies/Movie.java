@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 /**
  * Created by goyo on 2/2/17.
+ * This class is a model of The Movie DB API records that we are taking into account for our app.
+ * It implements Parcelable to make it easy to send this kind of objects between Intents.
  */
 
 public class Movie implements Parcelable {

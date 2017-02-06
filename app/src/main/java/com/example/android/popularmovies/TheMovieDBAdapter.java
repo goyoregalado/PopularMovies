@@ -1,7 +1,11 @@
 package com.example.android.popularmovies;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,15 +16,14 @@ import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 
-/**
- * Created by goyo on 31/1/17.
- */
+
 
 public class TheMovieDBAdapter extends
         RecyclerView.Adapter<TheMovieDBAdapter.TheMovieDBAdapterViewHolder>{
 
     private Movie mMoviesData[];
     final private TheMovieDBAdapterOnClickHandler mClickHandler;
+    final private String TAG = TheMovieDBAdapter.class.getSimpleName();
 
     interface TheMovieDBAdapterOnClickHandler {
         void onMovieClick(Movie movie);
@@ -44,7 +47,6 @@ public class TheMovieDBAdapter extends
         TheMovieDBAdapterViewHolder viewHolder = new TheMovieDBAdapterViewHolder(view);
 
         return viewHolder;
-
     }
 
     @Override
@@ -62,12 +64,13 @@ public class TheMovieDBAdapter extends
         String pictureUrl = mMoviesData[position].posterURL;
 
         Picasso.with(holder.mPosterImageView.getContext())
-                .load(pictureUrl).into(holder.mPosterImageView);
+               .load(pictureUrl)
+                .placeholder(R.mipmap.ic_launcher)
+                .into(holder.mPosterImageView);
+        Log.i(TAG, "Loading the picture");
     }
 
     public void setMovieData(Movie[] movieData) {
-        mMoviesData = null;
-        mMoviesData = new Movie[movieData.length];
         mMoviesData = movieData;
         notifyDataSetChanged();
     }
@@ -77,7 +80,7 @@ public class TheMovieDBAdapter extends
     }
 
     class TheMovieDBAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageView mPosterImageView;
+        public final ImageView mPosterImageView;
 
         public TheMovieDBAdapterViewHolder(View view) {
             super(view);
@@ -90,5 +93,8 @@ public class TheMovieDBAdapter extends
             int position = getAdapterPosition();
             mClickHandler.onMovieClick(mMoviesData[position]);
         }
+
+
     }
+
 }

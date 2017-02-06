@@ -1,9 +1,12 @@
 package com.example.android.popularmovies;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.PersistableBundle;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -65,23 +68,28 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
 
         mRecyclerView.setAdapter(mMovieAdapter);
 
+        // If we haven't nothing saved, then we must load the posters from the network.
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
-            Log.v(TAG, "There isn't any movie data so, look for that in Internet");
-            loadMoviePosters(PopularMoviesSettings.POPULAR_CRITERIA);
-            Log.v(TAG, "We should be looking at a lot of posters");
-
+            loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
         }
         else {
-            Log.v(TAG, "Restoring movie data");
+            Log.i(TAG, "Restoring movie data");
             mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.v(TAG, "I'm saving the data.");
+        Log.i(TAG, "Saving movie data.");
         outState.putParcelableArray("movieList", mMovieAdapter.getMovieData());
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        Log.v(TAG, "I'm restoring the data.");
+        mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override
@@ -105,21 +113,38 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * This method launchs and AsyncTask to retrieve the movie data from
+     * the network
+     * @param sorting_criteria: It should be one of two strings stored at PopularMoviesSettings.
+     *                        POPULAR_CRITERIA or RATING_CRITERIA.
+     */
     public void loadMoviePosters(String sorting_criteria){
 
         new FetchMovies().execute(sorting_criteria);
     }
 
+    /**
+     * Hides any error message view and shows the poster's grid.
+     */
     void showMoviePosters() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Hides the poster's grid and shows error messages views.
+     */
     void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
+
+    /**
+     * Launchs MovieDetailActivity Intent with the data related to a single movie
+     * @param movie The data related to the movie that the user selected.
+     */
     @Override
     public void onMovieClick(Movie movie) {
         Context context = this;
@@ -142,19 +167,19 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
         protected Movie[] doInBackground(String... params) {
             URL url = TheMovieDBUtils.buildMovieURL(params[0]);
             try {
-                Log.d(TAG, "Looking for a response");
+                Log.i(TAG, "Retrieving movie data from the network");
                 String response = TheMovieDBUtils.getResponseFromHttpsUrl(url);
-                Log.d(TAG, "That's is: " + response);
                 Movie[] parsedResponse = TheMovieDBJsonUtils.getMovieArrayFromJSON(response);
                 return parsedResponse;
             }
             catch (IOException e){
                 e.printStackTrace();
+                Log.e(TAG, "IOException in AsyncTask");
                 return null;
             }
             catch (JSONException e2) {
                 e2.printStackTrace();
-                Log.v(TAG, "Que pasa aqui...");
+                Log.e(TAG, "JSONException in AsyncTask");
                 return null;
             }
         }
@@ -163,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
         protected void onPostExecute(Movie[] movies) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
             if (movies != null) {
-                Log.v(TAG, "Showing movie posters");
+                Log.i(TAG, "Showing movie posters");
                 showMoviePosters();
                 mMovieAdapter.setMovieData(movies);
             }
