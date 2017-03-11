@@ -57,6 +57,18 @@
                     android:layout_gravity="start"
                     android:paddingLeft="32dp"
                     android:paddingTop="16dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16dp"
+                    android:fontFamily="sans-serif"
+                    android:layout_marginLeft="32dp"
+                    android:layout_marginRight="16dp"
+                    android:drawableLeft="@drawable/grey_star"
+                    android:drawablePadding="5dp"
+                    android:text="@string/mark_as_favorite"
+                    android:layout_gravity="center_vertical"
+                    android:background="@color/favoriteBackground"/>
 
             </LinearLayout>
 
@@ -68,5 +80,63 @@
             android:padding="16dp"
             android:textSize="18sp"
             android:fontFamily="sans-serif"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:padding="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/trailers_header"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+
+        <TextView
+            android:id="@+id/tv_trailer_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|start"
+            android:drawableLeft="@drawable/icon_play"
+            android:padding="16dp"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif"
+            android:text="Título"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:padding="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/reviews_header"
+            />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
+
+        <TextView
+            android:id="@+id/tv_review"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:fontFamily="sans-serif"
+            android:textSize="18sp"
+            android:text="Bla, bla, bla, bla, bla, Lorem ipsum and whatever"
+        />
+
+
+
     </LinearLayout>
 </ScrollView>

@@ -109,6 +109,9 @@ public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter
             case R.id.action_top_rated:
                 loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
                 return true;
+            case R.id.action_favorites:
+                // TODO: Implement action_favorites
+                Log.d(TAG, "You should implement this");
         }
         return super.onOptionsItemSelected(item);
     }

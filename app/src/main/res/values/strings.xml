@@ -4,6 +4,10 @@
     <string name="poster_description">This is an image which contains a movie\'s poster</string>
     <string name="most_popular">Most popular</string>
     <string name="top_rated">Top rated</string>
+    <string name="favorites">Favorites</string>
     <string name="release_date">Release date:</string>
     <string name="user_rating">User\'s rating:</string>
+    <string name="trailers_header">Trailers:</string>
+    <string name="reviews_header">User\'s reviews:</string>
+    <string name="mark_as_favorite">Mark as favorite</string>
 </resources>
