@@ -54,9 +54,7 @@ public class TheMovieDBAdapter extends
         if (mMoviesData == null) {
             return 0;
         }
-        else {
-            return mMoviesData.length;
-        }
+        return mMoviesData.length;
     }
 
     @Override
