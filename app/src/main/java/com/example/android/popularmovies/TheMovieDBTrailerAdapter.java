@@ -1,6 +1,9 @@
 package com.example.android.popularmovies;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -12,12 +15,15 @@ import android.widget.TextView;
 public class TheMovieDBTrailerAdapter
         extends RecyclerView.Adapter<TheMovieDBTrailerAdapter.TheMovieDBTrailerAdapterViewHolder>{
 
-    final private TheMovieDBTrailerAdapterOnClickHandler mClickHandler;
-    private Trailer[] mTrailer;
-
     interface TheMovieDBTrailerAdapterOnClickHandler {
         void onTrailerClick(Trailer trailer);
     }
+
+    private static final String TAG = TheMovieDBTrailerAdapter.class.getSimpleName();
+
+    final private TheMovieDBTrailerAdapterOnClickHandler mClickHandler;
+    private Trailer[] mTrailer;
+
 
     public TheMovieDBTrailerAdapter(TheMovieDBTrailerAdapterOnClickHandler clickHandler) {
         mClickHandler = clickHandler;
@@ -26,12 +32,22 @@ public class TheMovieDBTrailerAdapter
 
     @Override
     public TheMovieDBTrailerAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return null;
+        Context context = parent.getContext();
+
+        LayoutInflater inflater = LayoutInflater.from(context);
+
+        View view = inflater.inflate(R.layout.trailer_item, parent, false);
+
+        TheMovieDBTrailerAdapterViewHolder viewHolder = new TheMovieDBTrailerAdapterViewHolder(view);
+
+        return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(TheMovieDBTrailerAdapterViewHolder holder, int position) {
-
+        String trailerTitle = mTrailer[position].title;
+        holder.mTrailerTextView.setText(trailerTitle);
+        Log.d(TAG, "Loading trailer title: " + mTrailer[position].title);
     }
 
     @Override
@@ -40,6 +56,15 @@ public class TheMovieDBTrailerAdapter
             return 0;
         }
         return mTrailer.length;
+    }
+
+    public void setTrailerData(Trailer[] trailers) {
+        mTrailer = trailers;
+        notifyDataSetChanged();
+    }
+
+    public Trailer[] getTrailerData() {
+        return mTrailer;
     }
 
     public class TheMovieDBTrailerAdapterViewHolder extends RecyclerView.ViewHolder

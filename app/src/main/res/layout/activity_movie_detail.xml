@@ -86,6 +86,7 @@
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"/>
 
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -95,22 +96,32 @@
             android:textStyle="bold"
             android:text="@string/trailers_header"
             />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_trailers"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            />
 
         <TextView
-            android:id="@+id/tv_trailer_title"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_trailer_error_message"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:drawableLeft="@drawable/icon_play"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:text="@string/trailers_error_message"
             android:padding="16dp"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif"
-            android:text="Título"/>
+            android:visibility="invisible"
+            />
+
+        <ProgressBar
+            android:id="@+id/pb_trailer_loading_indicator"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:visibility="invisible"/>
+
+
 
         <TextView
             android:layout_width="match_parent"

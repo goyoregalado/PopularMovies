@@ -26,9 +26,14 @@ public class TheMovieDBUtils {
     private static final String POPULAR_BASE_URL = "https://api.themoviedb.org/3/movie/popular";
     private static final String TOP_RATED_BASE_URL = "https://api.themoviedb.org/3/movie/top_rated";
     private static final String TRAILER_BASE_URL = "https://api.themoviedb.org/3/movie";
+    private static final String TRAILER_PATH = "videos";
     private static final String PICTURE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String API_KEY_QUERY_PARAM = "api_key";
     private static final String PICTURE_DEFAULT_SIZE = "w185";
+
+    // Youtube base URL to play the trailers.
+    private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_TRAILER_KEY_PARAM = "v";
 
     /**
      * This method will build the URL used to query TheMovieDB service.
@@ -68,11 +73,17 @@ public class TheMovieDBUtils {
     }
 
 
+    /**
+     * This method will build a full trailer URL for the movie represented by movieId.
+     * @param movieId The identification of a Movie at TMDB API.
+     * @return A full trailer URL.
+     */
     public static URL buildTrailerURL(String movieId){
         Uri builtUri = null;
 
         builtUri = Uri.parse(TRAILER_BASE_URL).buildUpon()
                 .appendPath(movieId)
+                .appendPath(TRAILER_PATH)
                 .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY).build();
 
         URL url = null;
@@ -108,6 +119,27 @@ public class TheMovieDBUtils {
         }
         Log.v(TAG, "Built image URL: " + url);
         return url;
+    }
+
+
+    /**
+     * This method builds a valid YOUTUBE URL which allows to reproduce a single trailer.
+     * This kind of URL are in this format: https://www.youtube.com/watch?v=<KEY>
+     * @param key The youtube key for the trailer that we want to reproduce.
+     * @return A youtube valid URL for the trailer.
+     */
+    public static URL buildVideoURL(String key) {
+        Uri builtUri = Uri.parse(YOUTUBE_BASE_URL).buildUpon()
+                .appendQueryParameter(YOUTUBE_TRAILER_KEY_PARAM, key).build();
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        }
+        Log.v(TAG, "Built youtube URL: " + url);
+        return url;
+
     }
 
     /**

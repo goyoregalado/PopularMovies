@@ -10,13 +10,15 @@ import android.os.Parcelable;
  */
 
 public class Movie implements Parcelable {
+    String id;
     String originalTitle;
     String posterURL;
     String plotSynopsis;
     double userRating;
     String releaseDate;
 
-    public Movie(String title, String poster, String synopsis, double rating, String date) {
+    public Movie(String id, String title, String poster, String synopsis, double rating, String date) {
+        this.id = id;
         this.originalTitle = title;
         this.posterURL = poster;
         this.plotSynopsis = synopsis;
@@ -25,6 +27,7 @@ public class Movie implements Parcelable {
     }
 
     private Movie(Parcel in) {
+        this.id = in.readString();
         this.originalTitle = in.readString();
         this.posterURL = in.readString();
         this.plotSynopsis = in.readString();
@@ -39,6 +42,7 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.id);
         dest.writeString(this.originalTitle);
         dest.writeString(this.posterURL);
         dest.writeString(this.plotSynopsis);

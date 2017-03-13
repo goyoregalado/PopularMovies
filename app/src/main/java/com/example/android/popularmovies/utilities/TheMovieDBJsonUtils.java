@@ -3,10 +3,13 @@ package com.example.android.popularmovies.utilities;
 import android.content.Context;
 
 import com.example.android.popularmovies.Movie;
+import com.example.android.popularmovies.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.net.URL;
 
 /**
  * Created by goyo on 1/2/17.
@@ -43,6 +46,15 @@ public class TheMovieDBJsonUtils  {
     final static String TMDB_VIDEO = "video";
 
     final static String TMDB_VOTE_AVERAGE = "vote_average";
+
+    // Constants for Trailers
+    final static String TMDB_TRAILER_ID = "id";
+
+    final static String TMDB_TRAILER_KEY = "key";
+
+    final static String TMDB_TRAILER_NAME = "name";
+
+
 
 
     /**
@@ -96,14 +108,40 @@ public class TheMovieDBJsonUtils  {
         for (int i = 0; i < moviesArray.length(); i++) {
             JSONObject movie = moviesArray.getJSONObject(i);
 
+            String id = movie.getString(TMDB_ID);
             String title = movie.getString(TMDB_ORIGINAL_TITLE);
             String posterURL = TheMovieDBUtils.buildPictureURL(movie.getString(TMDB_POSTER)).toString();
             String synopsis = movie.getString(TMDB_OVERVIEW);
             double rating = movie.getDouble(TMDB_VOTE_AVERAGE);
             String releaseDate = movie.getString(TMDB_RELEASE_DATE);
             
-            moviesParsedArray[i] = new Movie(title, posterURL, synopsis, rating, releaseDate);
+            moviesParsedArray[i] = new Movie(id, title, posterURL, synopsis, rating, releaseDate);
         }
         return moviesParsedArray;
+    }
+
+
+    public static Trailer[] getTrailerArrayFromJSON(String trailersJSONStr) throws JSONException {
+        Trailer[] trailersParsedArray;
+
+        JSONObject trailersJSON = new JSONObject(trailersJSONStr);
+
+        if (!trailersJSON.has(TMDB_RESULTS)) {
+            return null;
+        }
+        JSONArray trailersArray = trailersJSON.getJSONArray(TMDB_RESULTS);
+
+        trailersParsedArray = new Trailer[trailersArray.length()];
+
+        for (int i = 0; i < trailersArray.length(); i++) {
+            JSONObject trailer = trailersArray.getJSONObject(i);
+            String id = trailer.getString(TMDB_TRAILER_ID);
+            String key = trailer.getString(TMDB_TRAILER_KEY);
+            String title = trailer.getString(TMDB_TRAILER_NAME);
+            URL youtubeUrl = TheMovieDBUtils.buildTrailerURL(id);
+            String url = youtubeUrl.toString();
+            trailersParsedArray[i] = new Trailer(id, title, url);
+        }
+        return trailersParsedArray;
     }
 }

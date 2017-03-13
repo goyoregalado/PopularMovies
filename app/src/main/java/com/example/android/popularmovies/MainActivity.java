@@ -28,7 +28,8 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements TheMovieDBAdapter.TheMovieDBAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity
+        implements TheMovieDBAdapter.TheMovieDBAdapterOnClickHandler {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;

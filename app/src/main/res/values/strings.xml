@@ -8,6 +8,7 @@
     <string name="release_date">Release date:</string>
     <string name="user_rating">User\'s rating:</string>
     <string name="trailers_header">Trailers:</string>
+    <string name="trailers_error_message">There aren\'t any trailer, yet!</string>
     <string name="reviews_header">User\'s reviews:</string>
     <string name="mark_as_favorite">Mark as favorite</string>
 </resources>
