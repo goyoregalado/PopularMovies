@@ -25,8 +25,9 @@ public class TheMovieDBUtils {
 
     private static final String POPULAR_BASE_URL = "https://api.themoviedb.org/3/movie/popular";
     private static final String TOP_RATED_BASE_URL = "https://api.themoviedb.org/3/movie/top_rated";
-    private static final String TRAILER_BASE_URL = "https://api.themoviedb.org/3/movie";
+    private static final String MOVIE_DETAIL_BASE_URL = "https://api.themoviedb.org/3/movie";
     private static final String TRAILER_PATH = "videos";
+    private static final String REVIEW_PATH = "reviews";
     private static final String PICTURE_BASE_URL = "http://image.tmdb.org/t/p/";
     private static final String API_KEY_QUERY_PARAM = "api_key";
     private static final String PICTURE_DEFAULT_SIZE = "w185";
@@ -81,7 +82,7 @@ public class TheMovieDBUtils {
     public static URL buildTrailerURL(String movieId){
         Uri builtUri = null;
 
-        builtUri = Uri.parse(TRAILER_BASE_URL).buildUpon()
+        builtUri = Uri.parse(MOVIE_DETAIL_BASE_URL).buildUpon()
                 .appendPath(movieId)
                 .appendPath(TRAILER_PATH)
                 .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY).build();
@@ -96,6 +97,28 @@ public class TheMovieDBUtils {
         }
 
         Log.i(TAG, "Trailer URL: " + url);
+        return url;
+    }
+
+
+
+    public static URL buildReviewsURL(String movieId) {
+        Uri builtUri = Uri.parse(MOVIE_DETAIL_BASE_URL).buildUpon()
+                .appendPath(movieId)
+                .appendPath(REVIEW_PATH)
+                .appendQueryParameter(API_KEY_QUERY_PARAM, CredentialUtils.APIKEY)
+                .build();
+
+        URL url = null;
+
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            Log.e(TAG, "Malformed URL");
+        }
+
+        Log.i(TAG, "Reviews URL: " + url);
         return url;
     }
 
