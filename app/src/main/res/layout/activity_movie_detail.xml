@@ -97,6 +97,7 @@
             android:text="@string/trailers_header"
             />
 
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_trailers"
             android:layout_height="match_parent"
@@ -121,7 +122,10 @@
             android:layout_gravity="center"
             android:visibility="invisible"/>
 
-
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -132,21 +136,30 @@
             android:textStyle="bold"
             android:text="@string/reviews_header"
             />
-        <View
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_reviews"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
+            />
 
         <TextView
-            android:id="@+id/tv_review"
-            android:layout_width="match_parent"
+            android:id="@+id/tv_review_error_message"
             android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:text="@string/reviews_error_message"
             android:padding="16dp"
-            android:fontFamily="sans-serif"
-            android:textSize="18sp"
-            android:text="Bla, bla, bla, bla, bla, Lorem ipsum and whatever"
-        />
+            android:visibility="invisible"
+            />
 
+        <ProgressBar
+            android:id="@+id/pb_review_loading_indicator"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="center"
+            android:visibility="invisible"/>
 
 
     </LinearLayout>

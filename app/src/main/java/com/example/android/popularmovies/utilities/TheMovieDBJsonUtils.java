@@ -3,6 +3,7 @@ package com.example.android.popularmovies.utilities;
 import android.content.Context;
 
 import com.example.android.popularmovies.Movie;
+import com.example.android.popularmovies.Review;
 import com.example.android.popularmovies.Trailer;
 
 import org.json.JSONArray;
@@ -53,6 +54,12 @@ public class TheMovieDBJsonUtils  {
     final static String TMDB_TRAILER_KEY = "key";
 
     final static String TMDB_TRAILER_NAME = "name";
+
+
+    //Constants for Reviews
+    final static String TMDB_REVIEW_ID = "id";
+    final static String TMDB_REVIEW_AUTHOR = "author";
+    final static String TMDB_REVIEW_CONTENT = "content";
 
 
 
@@ -138,10 +145,35 @@ public class TheMovieDBJsonUtils  {
             String id = trailer.getString(TMDB_TRAILER_ID);
             String key = trailer.getString(TMDB_TRAILER_KEY);
             String title = trailer.getString(TMDB_TRAILER_NAME);
-            URL youtubeUrl = TheMovieDBUtils.buildTrailerURL(id);
+            URL youtubeUrl = TheMovieDBUtils.buildVideoURL(key);
             String url = youtubeUrl.toString();
             trailersParsedArray[i] = new Trailer(id, title, url);
         }
         return trailersParsedArray;
+    }
+
+
+    public static Review[] getReviewArrayFromJSON(String reviewJSONStr) throws JSONException {
+        Review[] reviewsParsedArray;
+        JSONObject reviewsJSON = new JSONObject(reviewJSONStr);
+
+        if (!reviewsJSON.has(TMDB_RESULTS)) {
+            return null;
+        }
+
+        JSONArray reviewsArray = reviewsJSON.getJSONArray(TMDB_RESULTS);
+
+        reviewsParsedArray = new Review[reviewsArray.length()];
+
+        for(int i = 0; i < reviewsArray.length(); i++) {
+            JSONObject review = reviewsArray.getJSONObject(i);
+            String id = review.getString(TMDB_REVIEW_ID);
+            String author = review.getString(TMDB_REVIEW_AUTHOR);
+            String content = review.getString(TMDB_REVIEW_CONTENT);
+
+            reviewsParsedArray[i] = new Review(id, author, content);
+        }
+
+        return reviewsParsedArray;
     }
 }

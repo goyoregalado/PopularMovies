@@ -24,8 +24,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class MovieDetailActivity extends AppCompatActivity
-        implements TheMovieDBTrailerAdapter.TheMovieDBTrailerAdapterOnClickHandler{
-
+        implements TheMovieDBTrailerAdapter.TheMovieDBTrailerAdapterOnClickHandler,
+        TheMovieDBReviewAdapter.TheMovieDBReviewAdapterOnClickHandler {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
 
     private String mMovieId;
@@ -39,6 +39,11 @@ public class MovieDetailActivity extends AppCompatActivity
     private TheMovieDBTrailerAdapter mTrailerAdapter;
     private TextView mTrailerError;
     private ProgressBar mTrailerProgressBar;
+
+    private RecyclerView mReviewRecyclerView;
+    private TheMovieDBReviewAdapter mReviewAdapter;
+    private TextView mReviewError;
+    private ProgressBar mReviewProgressBar;
 
 
     @Override
@@ -54,9 +59,9 @@ public class MovieDetailActivity extends AppCompatActivity
 
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager trailersLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        mTrailerRecyclerView.setLayoutManager(layoutManager);
+        mTrailerRecyclerView.setLayoutManager(trailersLayoutManager);
 
         mTrailerRecyclerView.setHasFixedSize(true);
 
@@ -66,6 +71,24 @@ public class MovieDetailActivity extends AppCompatActivity
         mTrailerAdapter = new TheMovieDBTrailerAdapter(this);
 
         mTrailerRecyclerView.setAdapter(mTrailerAdapter);
+
+
+        mReviewError = (TextView) findViewById(R.id.tv_review_error_message);
+        mReviewProgressBar = (ProgressBar) findViewById(R.id.pb_review_loading_indicator);
+
+        mReviewRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_reviews);
+
+        LinearLayoutManager reviewsLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mReviewRecyclerView.setLayoutManager(reviewsLayoutManager);
+
+        mReviewRecyclerView.setHasFixedSize(true);
+
+        mReviewAdapter = new TheMovieDBReviewAdapter(this);
+
+        mReviewRecyclerView.setAdapter(mReviewAdapter);
+
+
 
         Intent intent = getIntent();
 
@@ -90,28 +113,32 @@ public class MovieDetailActivity extends AppCompatActivity
             mMovieUserRating.setText(ratingStr);
             mSynopsis.setText(movie.plotSynopsis);
             Picasso.with(this).load(movie.posterURL).into(mMoviePoster);
-            if (savedInstanceState == null || !savedInstanceState.containsKey("trailerList")) {
-                Log.i(TAG, "Obtaining trailers from TMDB");
+            if (savedInstanceState == null || !savedInstanceState.containsKey("trailerList") || !savedInstanceState.containsKey("reviewList")) {
+                Log.i(TAG, "Obtaining trailers and reviews from TMDB");
                 new FetchTrailers().execute(mMovieId);
+                new FetchReviews().execute(mMovieId);
             }
             else {
-                Log.i(TAG, "Restoring trailer data");
+                Log.i(TAG, "Restoring trailer and review data");
                 mTrailerAdapter.setTrailerData((Trailer[]) savedInstanceState.getParcelableArray("trailerList"));
+                mReviewAdapter.setReviewData((Review []) savedInstanceState.getParcelableArray("reviewList"));
             }
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.i(TAG, "Saving trailerData");
+        Log.i(TAG, "Saving trailerData and reviewData");
         outState.putParcelableArray("trailerList", mTrailerAdapter.getTrailerData());
+        outState.putParcelableArray("reviewList", mReviewAdapter.getReviewData());
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Log.i(TAG, "I'm restoring trailer data");
+        Log.i(TAG, "I'm restoring trailer and review data");
         mTrailerAdapter.setTrailerData((Trailer[]) savedInstanceState.getParcelableArray("trailerList"));
+        mReviewAdapter.setReviewData((Review[]) savedInstanceState.getParcelableArray("reviewList"));
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -125,10 +152,26 @@ public class MovieDetailActivity extends AppCompatActivity
         mTrailerError.setVisibility(View.VISIBLE);
     }
 
+    private void showReviews() {
+        mReviewError.setVisibility(View.INVISIBLE);
+        mReviewRecyclerView.setVisibility(View.VISIBLE);
+    }
+
+    private void showReviewsErrorMessage() {
+        mReviewRecyclerView.setVisibility(View.INVISIBLE);
+        mReviewError.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void onTrailerClick(Trailer trailer) {
         //TODO: Launch Youtube Intent.
         Log.d(TAG, "Trailer clicked: " + trailer.title);
+    }
+
+    @Override
+    public void onReviewClick(Review review) {
+        Log.d(TAG, "Review clicked: " + review.author);
+
     }
 
 
@@ -150,11 +193,11 @@ public class MovieDetailActivity extends AppCompatActivity
 
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e(TAG, "IOException in AsyncTask");
+                Log.e(TAG, "IOException in FetchTrailer");
                 return null;
             } catch (JSONException e) {
                 e.printStackTrace();
-                Log.e(TAG, "JSON exception in AsyncTask");
+                Log.e(TAG, "JSON exception in FetchTrailer");
                 return null;
             }
         }
@@ -167,7 +210,52 @@ public class MovieDetailActivity extends AppCompatActivity
                 showTrailers();
                 mTrailerAdapter.setTrailerData(trailers);
             }
-            super.onPostExecute(trailers);
+            else {
+                showTrailersErrorMessage();
+            }
+        }
+    }
+
+    class FetchReviews extends AsyncTask<String, Void, Review[]> {
+
+
+        @Override
+        protected void onPreExecute() {
+            mReviewProgressBar.setVisibility(View.VISIBLE);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Review[] doInBackground(String... params) {
+            URL url = TheMovieDBUtils.buildReviewsURL(params[0]);
+            try {
+                String response = TheMovieDBUtils.getResponseFromHttpsUrl(url);
+                Review[] parsedResponse = TheMovieDBJsonUtils.getReviewArrayFromJSON(response);
+                return parsedResponse;
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "IOException in FetchReviews");
+                return null;
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                Log.e(TAG, "JSONException in FetchReviews");
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Review[] reviews) {
+            mReviewProgressBar.setVisibility(View.INVISIBLE);
+            if (reviews != null) {
+                Log.i(TAG, "Showing reviews");
+                showReviews();
+                mReviewAdapter.setReviewData(reviews);
+            }
+            else {
+                showReviewsErrorMessage();
+            }
         }
     }
 }

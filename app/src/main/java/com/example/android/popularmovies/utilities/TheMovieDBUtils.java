@@ -101,7 +101,11 @@ public class TheMovieDBUtils {
     }
 
 
-
+    /**
+     * This method returns every review for a movie identified by movieId.
+     * @param movieId The id of the movie which we want to retrieve the reviews for.
+     * @return The full URL to the review list resource.
+     */
     public static URL buildReviewsURL(String movieId) {
         Uri builtUri = Uri.parse(MOVIE_DETAIL_BASE_URL).buildUpon()
                 .appendPath(movieId)
