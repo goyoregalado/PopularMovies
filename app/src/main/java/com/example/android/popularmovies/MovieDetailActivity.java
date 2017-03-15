@@ -1,6 +1,7 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -164,13 +165,21 @@ public class MovieDetailActivity extends AppCompatActivity
 
     @Override
     public void onTrailerClick(Trailer trailer) {
-        //TODO: Launch Youtube Intent.
         Log.d(TAG, "Trailer clicked: " + trailer.title);
+        Uri uri = Uri.parse(trailer.trailerUrl);
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     @Override
     public void onReviewClick(Review review) {
         Log.d(TAG, "Review clicked: " + review.author);
+
+    }
+
+    public void onClickAddFavouriteMovie(View view) {
 
     }
 

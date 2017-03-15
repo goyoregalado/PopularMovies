@@ -13,4 +13,7 @@
     <string name="reviews_error_message">There aren\'t any trailer, yet!</string>
     <string name="mark_as_favorite">Mark as favorite</string>
     <string name="author">Author:</string>
+    <string name="unsupported_operation_error_msg">Unsupported operation</string>
+    <string name="unknown_uri_error_msg">Unknown URI</string>
+    <string name="insert_failed_error_msg">Failed to insert row</string>
 </resources>
