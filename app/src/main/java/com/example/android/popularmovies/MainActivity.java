@@ -3,6 +3,8 @@ package com.example.android.popularmovies;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.PersistableBundle;
@@ -19,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.data.FavouriteMoviesContract;
 import com.example.android.popularmovies.utilities.PopularMoviesSettings;
 import com.example.android.popularmovies.utilities.TheMovieDBJsonUtils;
 import com.example.android.popularmovies.utilities.TheMovieDBUtils;
@@ -34,11 +37,15 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
 
+    private static final int ONLINE_MOVIE_LOADER = 7;
+    private static final int OFFLINE_MOVIE_LOADER = 8;
+
 
     private RecyclerView mRecyclerView;
     private TheMovieDBAdapter mMovieAdapter;
 
     private TextView mErrorMessageDisplay;
+    private TextView mFavoriteErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
 
     private Toast mToast;
@@ -51,6 +58,8 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_posters);
 
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
+
+        mFavoriteErrorMessageDisplay = (TextView) findViewById(R.id.tv_favorite_error_message);
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
@@ -75,6 +84,8 @@ public class MainActivity extends AppCompatActivity
         }
         else {
             Log.i(TAG, "Restoring movie data");
+            Movie movie = savedInstanceState.getParcelable("movieList");
+            Log.d(TAG, movie.originalTitle);
             mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
         }
     }
@@ -111,8 +122,9 @@ public class MainActivity extends AppCompatActivity
                 loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
                 return true;
             case R.id.action_favorites:
-                // TODO: Implement action_favorites
-                Log.d(TAG, "You should implement this");
+                loadFavoriteMovies();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
@@ -124,8 +136,31 @@ public class MainActivity extends AppCompatActivity
      *                        POPULAR_CRITERIA or RATING_CRITERIA.
      */
     public void loadMoviePosters(String sorting_criteria){
-
+        // TODO: Implement an Async Task Loader.
         new FetchMovies().execute(sorting_criteria);
+    }
+
+    /**
+     * This method uses the content provider to obtain the favorite movies from an Sqlite database.
+     */
+    public void loadFavoriteMovies(){
+        // TODO: Implement a Cursor Async Loader.
+        Uri uri = FavouriteMoviesContract.FavouriteMoviesEntry.CONTENT_URI;
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        Log.d(TAG, "Retrieved num records: " + cursor.getCount());
+        Movie[] movies = TheMovieDBUtils.loadMovieArrayFromCursor(cursor);
+        if (movies != null) {
+            if (movies.length == 0) {
+                showFavoriteErrorMessage();
+            }
+            else {
+                showMoviePosters();
+                mMovieAdapter.setMovieData(movies);
+            }
+        }
+        else {
+            showErrorMessage();
+        }
     }
 
     /**
@@ -133,6 +168,7 @@ public class MainActivity extends AppCompatActivity
      */
     void showMoviePosters() {
         mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mFavoriteErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
@@ -141,8 +177,22 @@ public class MainActivity extends AppCompatActivity
      */
     void showErrorMessage() {
         mRecyclerView.setVisibility(View.INVISIBLE);
+        mFavoriteErrorMessageDisplay.setVisibility(View.INVISIBLE);
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
+
+    /**
+     * Hides the poster's grid and conventional error messages views and shows
+     * an error message related to the inexistence of favorite movies.
+     */
+    void showFavoriteErrorMessage() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        mFavoriteErrorMessageDisplay.setVisibility(View.VISIBLE);
+
+    }
+
+
 
 
     /**
@@ -172,6 +222,7 @@ public class MainActivity extends AppCompatActivity
             URL url = TheMovieDBUtils.buildMovieURL(params[0]);
             try {
                 Log.i(TAG, "Retrieving movie data from the network");
+                Log.i(TAG, url.toString());
                 String response = TheMovieDBUtils.getResponseFromHttpsUrl(url);
                 Movie[] parsedResponse = TheMovieDBJsonUtils.getMovieArrayFromJSON(response);
                 return parsedResponse;

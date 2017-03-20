@@ -32,7 +32,7 @@ public class FavouriteMoviesDbHelper extends SQLiteOpenHelper {
                 FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_SYNOPSIS + " TEXT NOT NULL," +
                 FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_POSTER_URL + " TEXT NOT NULL," +
                 FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_USER_RATING + " REAL NOT NULL," +
-                FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_RELEASE_DATE + " TIMESTAMP);";
+                FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_RELEASE_DATE + " TEXT NOT NULL);";
 
         Log.d(TAG, SQL_CREATE_WAITLIST_TABLE);
         db.execSQL(SQL_CREATE_WAITLIST_TABLE);

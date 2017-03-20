@@ -121,8 +121,9 @@ public class TheMovieDBJsonUtils  {
             String synopsis = movie.getString(TMDB_OVERVIEW);
             double rating = movie.getDouble(TMDB_VOTE_AVERAGE);
             String releaseDate = movie.getString(TMDB_RELEASE_DATE);
-            
-            moviesParsedArray[i] = new Movie(id, title, posterURL, synopsis, rating, releaseDate);
+            //As this movie has been retrieved from TheMovie DataBAse, it's not favorite so.
+            boolean favorite = false;
+            moviesParsedArray[i] = new Movie(id, title, posterURL, synopsis, rating, releaseDate, favorite);
         }
         return moviesParsedArray;
     }

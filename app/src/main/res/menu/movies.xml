@@ -5,18 +5,18 @@
         android:id="@+id/action_top_rated"
         android:title="@string/top_rated"
         android:orderInCategory="1"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_most_popular"
         android:title="@string/most_popular"
         android:orderInCategory="2"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
     <item
         android:id="@+id/action_favorites"
         android:title="@string/favorites"
         android:orderInCategory="3"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
 
 </menu>

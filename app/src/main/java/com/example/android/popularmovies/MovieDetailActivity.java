@@ -1,8 +1,10 @@
 package com.example.android.popularmovies;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +14,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.popularmovies.data.FavouriteMoviesContract;
 import com.example.android.popularmovies.utilities.TheMovieDBJsonUtils;
 import com.example.android.popularmovies.utilities.TheMovieDBUtils;
 import com.squareup.picasso.Picasso;
@@ -29,12 +33,16 @@ public class MovieDetailActivity extends AppCompatActivity
         TheMovieDBReviewAdapter.TheMovieDBReviewAdapterOnClickHandler {
     private static final String TAG = MovieDetailActivity.class.getSimpleName();
 
-    private String mMovieId;
+    //private String mMovieId;
+    private Movie mMovie;
+
+
     private TextView mOriginalTitle;
     private ImageView mMoviePoster;
     private TextView mMovieReleaseDate;
     private TextView mMovieUserRating;
     private TextView mSynopsis;
+    private TextView mFavorite;
 
     private RecyclerView mTrailerRecyclerView;
     private TheMovieDBTrailerAdapter mTrailerAdapter;
@@ -52,11 +60,15 @@ public class MovieDetailActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
 
+        Log.d(TAG, "On create");
+
         mOriginalTitle = (TextView) findViewById(R.id.tv_original_title);
         mMoviePoster = (ImageView) findViewById(R.id.iv_detail_poster);
         mMovieReleaseDate = (TextView) findViewById(R.id.tv_release_date);
         mMovieUserRating = (TextView) findViewById(R.id.tv_user_rating);
         mSynopsis = (TextView) findViewById(R.id.tv_synopsis);
+
+        mFavorite = (TextView) findViewById(R.id.tv_favorite);
 
         mTrailerRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_trailers);
 
@@ -93,14 +105,23 @@ public class MovieDetailActivity extends AppCompatActivity
 
         Intent intent = getIntent();
 
-        if (intent.getExtras().getParcelable("movie") != null) {
-            Movie movie = intent.getExtras().getParcelable("movie");
+        if (savedInstanceState != null && savedInstanceState.containsKey("movie")) {
+            Log.d(TAG, "There's a movie in the bundle");
+            mMovie = (Movie) savedInstanceState.getParcelable("movie");
+        }
+        else if (intent.getExtras().getParcelable("movie") != null) {
+            Log.d(TAG, "There isn't a movie in the bundle obtaining it from intent");
+            mMovie = (Movie) intent.getExtras().getParcelable("movie");
+        }
 
-            mMovieId = movie.id;
+        if (mMovie != null) {
+            Log.d(TAG, "There's a movie: " + mMovie);
 
-            mOriginalTitle.setText(movie.originalTitle);
+            mOriginalTitle.setText(mMovie.originalTitle);
 
-            Date date = TheMovieDBUtils.parseDate(movie.releaseDate);
+            showFavorite(mMovie.favorite);
+
+            Date date = TheMovieDBUtils.parseDate(mMovie.releaseDate);
 
             Calendar c = Calendar.getInstance();
 
@@ -108,21 +129,23 @@ public class MovieDetailActivity extends AppCompatActivity
 
             String dateStr = getString(R.string.release_date) + " " + String.valueOf(c.get(Calendar.YEAR));
 
-            String ratingStr = getString(R.string.user_rating) + " " + String.valueOf(movie.userRating) + "/10";
+            String ratingStr = getString(R.string.user_rating) + " " + String.valueOf(mMovie.userRating) + "/10";
 
             mMovieReleaseDate.setText(dateStr);
             mMovieUserRating.setText(ratingStr);
-            mSynopsis.setText(movie.plotSynopsis);
-            Picasso.with(this).load(movie.posterURL).into(mMoviePoster);
-            if (savedInstanceState == null || !savedInstanceState.containsKey("trailerList") || !savedInstanceState.containsKey("reviewList")) {
-                Log.i(TAG, "Obtaining trailers and reviews from TMDB");
-                new FetchTrailers().execute(mMovieId);
-                new FetchReviews().execute(mMovieId);
-            }
-            else {
+            mSynopsis.setText(mMovie.plotSynopsis);
+
+            Picasso.with(this).load(mMovie.posterURL).into(mMoviePoster);
+
+            if (savedInstanceState != null && savedInstanceState.containsKey("trailerList") && !savedInstanceState.containsKey("reviewList")) {
                 Log.i(TAG, "Restoring trailer and review data");
                 mTrailerAdapter.setTrailerData((Trailer[]) savedInstanceState.getParcelableArray("trailerList"));
                 mReviewAdapter.setReviewData((Review []) savedInstanceState.getParcelableArray("reviewList"));
+            }
+            else {
+                Log.i(TAG, "Obtaining trailers and reviews from TMDB");
+                new FetchTrailers().execute(mMovie.id);
+                new FetchReviews().execute(mMovie.id);
             }
         }
     }
@@ -130,6 +153,7 @@ public class MovieDetailActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i(TAG, "Saving trailerData and reviewData");
+        outState.putParcelable("movie", mMovie);
         outState.putParcelableArray("trailerList", mTrailerAdapter.getTrailerData());
         outState.putParcelableArray("reviewList", mReviewAdapter.getReviewData());
         super.onSaveInstanceState(outState);
@@ -138,6 +162,7 @@ public class MovieDetailActivity extends AppCompatActivity
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.i(TAG, "I'm restoring trailer and review data");
+        mMovie = (Movie) savedInstanceState.getParcelable("movie");
         mTrailerAdapter.setTrailerData((Trailer[]) savedInstanceState.getParcelableArray("trailerList"));
         mReviewAdapter.setReviewData((Review[]) savedInstanceState.getParcelableArray("reviewList"));
         super.onRestoreInstanceState(savedInstanceState);
@@ -179,7 +204,57 @@ public class MovieDetailActivity extends AppCompatActivity
 
     }
 
+    public void showFavorite(boolean favorite) {
+
+        if (favorite == true) {
+            mFavorite.setText(getString(R.string.delete_from_favorites));
+            mFavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.yellow_star, 0, 0, 0);
+        }
+        else {
+            mFavorite.setText(getString(R.string.mark_as_favorite));
+            mFavorite.setCompoundDrawablesWithIntrinsicBounds(R.drawable.black_star, 0, 0, 0);
+        }
+    }
+
     public void onClickAddFavouriteMovie(View view) {
+        if (mMovie.favorite) {
+            // TODO: The Uri is not built properly.
+            Uri uri = FavouriteMoviesContract.FavouriteMoviesEntry.CONTENT_URI.buildUpon().appendPath(mMovie.id).build();
+            Log.d(TAG, "El Id de delete: " + mMovie.id);
+
+            Log.d(TAG, "Delete URI: " + uri);
+
+            int moviesDeleted = getContentResolver().delete(uri, null, null);
+            if (moviesDeleted > 0) {
+                showFavorite(false);
+                mMovie.favorite = false;
+                Toast.makeText(view.getContext(), getString(R.string.favorite_deleted), Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(view.getContext(), getString(R.string.favorite_delete_error), Toast.LENGTH_LONG).show();
+            }
+        }
+        else {
+
+            // It isn't a favorite so we must save it to the database.
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_ID, mMovie.id);
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_TITLE, mMovie.originalTitle);
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_POSTER_URL, mMovie.posterURL);
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_SYNOPSIS, mMovie.plotSynopsis);
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_USER_RATING, mMovie.userRating);
+            contentValues.put(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_RELEASE_DATE, mMovie.releaseDate);
+
+            Uri uri = getContentResolver().insert(FavouriteMoviesContract.FavouriteMoviesEntry.CONTENT_URI, contentValues);
+            if (uri != null) {
+                showFavorite(true);
+                mMovie.favorite = true;
+                Toast.makeText(view.getContext(), getString(R.string.added_new_favorite), Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(view.getContext(), getString(R.string.favorite_insertion_error), Toast.LENGTH_LONG).show();
+            }
+        }
 
     }
 

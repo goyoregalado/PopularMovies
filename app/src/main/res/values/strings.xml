@@ -12,8 +12,14 @@
     <string name="reviews_header">User\'s reviews:</string>
     <string name="reviews_error_message">There aren\'t any trailer, yet!</string>
     <string name="mark_as_favorite">Mark as favorite</string>
+    <string name="delete_from_favorites">Delete from favorites</string>
     <string name="author">Author:</string>
     <string name="unsupported_operation_error_msg">Unsupported operation</string>
     <string name="unknown_uri_error_msg">Unknown URI</string>
     <string name="insert_failed_error_msg">Failed to insert row</string>
+    <string name="favorite_error_msg">There isn\'t any favorite film</string>
+    <string name="added_new_favorite">Added new favorite movie</string>
+    <string name="favorite_insertion_error">Error while saving favorite</string>
+    <string name="favorite_deleted">Deleted from favorites</string>
+    <string name="favorite_delete_error">Error deleting favorite movie</string>
 </resources>
