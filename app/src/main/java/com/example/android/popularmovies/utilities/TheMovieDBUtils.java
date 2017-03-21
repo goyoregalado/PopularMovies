@@ -219,25 +219,28 @@ public class TheMovieDBUtils {
     }
 
     public static Movie[] loadMovieArrayFromCursor(Cursor cursor) {
-        Movie[] movies = new Movie[cursor.getCount()];
-        cursor.moveToFirst();
-        for (int i = 0; i < cursor.getCount(); i++) {
-            String id = cursor.getString(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_ID));
-            String title = cursor.getString(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_TITLE));
-            String posterUrl = cursor.getString(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_POSTER_URL));
-            String plotSynopsis = cursor.getString(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_SYNOPSIS));
-            double userRating = cursor.getDouble(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_USER_RATING));
-            String releaseDate = cursor.getString(cursor
-                    .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_RELEASE_DATE));
-            boolean favorite = true;
-            movies[i] = new Movie(id, title, posterUrl, plotSynopsis, userRating, releaseDate, favorite);
-            cursor.moveToNext();
+        if (cursor != null) {
+            Movie[] movies = new Movie[cursor.getCount()];
+            cursor.moveToFirst();
+            for (int i = 0; i < cursor.getCount(); i++) {
+                String id = cursor.getString(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_ID));
+                String title = cursor.getString(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_TITLE));
+                String posterUrl = cursor.getString(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_POSTER_URL));
+                String plotSynopsis = cursor.getString(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_SYNOPSIS));
+                double userRating = cursor.getDouble(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_USER_RATING));
+                String releaseDate = cursor.getString(cursor
+                        .getColumnIndex(FavouriteMoviesContract.FavouriteMoviesEntry.COLUMN_RELEASE_DATE));
+                boolean favorite = true;
+                movies[i] = new Movie(id, title, posterUrl, plotSynopsis, userRating, releaseDate, favorite);
+                cursor.moveToNext();
+            }
+            return movies;
         }
-        return movies;
+        return null;
     }
 }

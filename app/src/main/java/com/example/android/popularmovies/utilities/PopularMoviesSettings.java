@@ -10,6 +10,7 @@ package com.example.android.popularmovies.utilities;
 public class PopularMoviesSettings {
     public static final String POPULAR_CRITERIA = "popular";
     public static final String RATING_CRITERIA = "topRated";
+    public static final String FAVORITE_CRITERIA = "favorite";
 
     public static final String DEFAULT_CRITERIA = "popular";
 }

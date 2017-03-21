@@ -9,6 +9,9 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.PersistableBundle;
 import android.provider.Settings;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -32,7 +35,8 @@ import java.io.IOException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity
-        implements TheMovieDBAdapter.TheMovieDBAdapterOnClickHandler {
+        implements TheMovieDBAdapter.TheMovieDBAdapterOnClickHandler,
+        LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
@@ -47,6 +51,9 @@ public class MainActivity extends AppCompatActivity
     private TextView mErrorMessageDisplay;
     private TextView mFavoriteErrorMessageDisplay;
     private ProgressBar mLoadingIndicator;
+
+
+    private String mSortingCriteria;
 
     private Toast mToast;
 
@@ -80,20 +87,30 @@ public class MainActivity extends AppCompatActivity
 
         // If we haven't nothing saved, then we must load the posters from the network.
         if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
-            loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
+            mSortingCriteria = PopularMoviesSettings.RATING_CRITERIA;
+            loadMoviePosters(mSortingCriteria);
         }
         else {
             Log.i(TAG, "Restoring movie data");
-            Movie movie = savedInstanceState.getParcelable("movieList");
-            Log.d(TAG, movie.originalTitle);
-            mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
+            //Movie movie = savedInstanceState.getParcelable("movieList");
+            //Log.d(TAG, movie.originalTitle);
+            mSortingCriteria = savedInstanceState.getString("sortingCriteria");
+            if (mSortingCriteria == "sortingCriteria") {
+                loadFavoriteMoviesAsyncLoader();
+            }
+            else {
+                mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
+
+            }
         }
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i(TAG, "Saving movie data.");
         outState.putParcelableArray("movieList", mMovieAdapter.getMovieData());
+        outState.putString("sortingCriteria", mSortingCriteria);
         super.onSaveInstanceState(outState);
     }
 
@@ -101,6 +118,7 @@ public class MainActivity extends AppCompatActivity
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.v(TAG, "I'm restoring the data.");
         mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
+        mSortingCriteria = savedInstanceState.getString("sortingCriteria");
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -116,13 +134,16 @@ public class MainActivity extends AppCompatActivity
 
         switch (itemSelected) {
             case R.id.action_most_popular:
-                loadMoviePosters(PopularMoviesSettings.POPULAR_CRITERIA);
+                mSortingCriteria = PopularMoviesSettings.POPULAR_CRITERIA;
+                loadMoviePosters(mSortingCriteria);
                 return true;
             case R.id.action_top_rated:
-                loadMoviePosters(PopularMoviesSettings.RATING_CRITERIA);
+                mSortingCriteria = PopularMoviesSettings.RATING_CRITERIA;
+                loadMoviePosters(mSortingCriteria);
                 return true;
             case R.id.action_favorites:
-                loadFavoriteMovies();
+                mSortingCriteria = PopularMoviesSettings.FAVORITE_CRITERIA;
+                loadFavoriteMoviesAsyncLoader();
                 return true;
 
         }
@@ -140,27 +161,12 @@ public class MainActivity extends AppCompatActivity
         new FetchMovies().execute(sorting_criteria);
     }
 
+
     /**
-     * This method uses the content provider to obtain the favorite movies from an Sqlite database.
+     * This method uses a Task Loader to retrieve the movies from the content provider.
      */
-    public void loadFavoriteMovies(){
-        // TODO: Implement a Cursor Async Loader.
-        Uri uri = FavouriteMoviesContract.FavouriteMoviesEntry.CONTENT_URI;
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        Log.d(TAG, "Retrieved num records: " + cursor.getCount());
-        Movie[] movies = TheMovieDBUtils.loadMovieArrayFromCursor(cursor);
-        if (movies != null) {
-            if (movies.length == 0) {
-                showFavoriteErrorMessage();
-            }
-            else {
-                showMoviePosters();
-                mMovieAdapter.setMovieData(movies);
-            }
-        }
-        else {
-            showErrorMessage();
-        }
+    public void loadFavoriteMoviesAsyncLoader() {
+       getSupportLoaderManager().initLoader(OFFLINE_MOVIE_LOADER, null, this);
     }
 
     /**
@@ -206,6 +212,77 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(context, detailActivityClass);
         intent.putExtra("movie", movie);
         startActivity(intent);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        return new AsyncTaskLoader<Cursor>(this) {
+            Cursor mFavouriteData = null;
+
+
+            @Override
+            protected void onStartLoading() {
+                if (mFavouriteData != null) {
+                    deliverResult(mFavouriteData);
+                }
+                else {
+                    forceLoad();
+                }
+            }
+
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    return getContentResolver().query(
+                            FavouriteMoviesContract.FavouriteMoviesEntry.CONTENT_URI,
+                            null,
+                            null,
+                            null,
+                            null);
+
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed to asynchronously load favorite movies data.");
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            public void deliverResult(Cursor data) {
+                mFavouriteData = data;
+                super.deliverResult(data);
+            }
+        };
+    }
+
+
+    /**
+     * 
+     * @param loader
+     * @param data
+     */
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Movie[] favoriteMovies = TheMovieDBUtils.loadMovieArrayFromCursor(data);
+        if (favoriteMovies != null) {
+            if (favoriteMovies.length == 0) {
+                showFavoriteErrorMessage();
+            }
+            else {
+                showMoviePosters();
+                mMovieAdapter.setMovieData(favoriteMovies);
+            }
+        }
+        else {
+            showErrorMessage();
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 
     class FetchMovies extends AsyncTask<String, Void, Movie[]> {
