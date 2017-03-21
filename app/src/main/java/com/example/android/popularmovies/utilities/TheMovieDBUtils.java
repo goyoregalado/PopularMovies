@@ -218,6 +218,12 @@ public class TheMovieDBUtils {
         return date;
     }
 
+
+    /**
+     * This method transforms a Cursor into a Movie[] array.
+     * @param cursor The cursor that contains the movies data.
+     * @return Returns a Movie's Array or null if the cursor isn't valid.
+     */
     public static Movie[] loadMovieArrayFromCursor(Cursor cursor) {
         if (cursor != null) {
             Movie[] movies = new Movie[cursor.getCount()];

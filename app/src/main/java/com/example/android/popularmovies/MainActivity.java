@@ -41,7 +41,9 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int COLUMNS = 2;
 
-    private static final int ONLINE_MOVIE_LOADER = 7;
+    private static final String MOVIE_LIST_KEY = "movieList";
+    private static final String SORTING_CRITERIA_KEY = "sortingCriteria";
+
     private static final int OFFLINE_MOVIE_LOADER = 8;
 
 
@@ -86,21 +88,18 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView.setAdapter(mMovieAdapter);
 
         // If we haven't nothing saved, then we must load the posters from the network.
-        if (savedInstanceState == null || !savedInstanceState.containsKey("movieList")) {
+        if (savedInstanceState == null || !savedInstanceState.containsKey(MOVIE_LIST_KEY)) {
             mSortingCriteria = PopularMoviesSettings.RATING_CRITERIA;
             loadMoviePosters(mSortingCriteria);
         }
         else {
             Log.i(TAG, "Restoring movie data");
-            //Movie movie = savedInstanceState.getParcelable("movieList");
-            //Log.d(TAG, movie.originalTitle);
-            mSortingCriteria = savedInstanceState.getString("sortingCriteria");
-            if (mSortingCriteria == "sortingCriteria") {
+            mSortingCriteria = savedInstanceState.getString(SORTING_CRITERIA_KEY);
+            if (mSortingCriteria == PopularMoviesSettings.FAVORITE_CRITERIA) {
                 loadFavoriteMoviesAsyncLoader();
             }
             else {
-                mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
-
+                mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray(MOVIE_LIST_KEY));
             }
         }
     }
@@ -109,16 +108,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         Log.i(TAG, "Saving movie data.");
-        outState.putParcelableArray("movieList", mMovieAdapter.getMovieData());
-        outState.putString("sortingCriteria", mSortingCriteria);
+        outState.putParcelableArray(MOVIE_LIST_KEY, mMovieAdapter.getMovieData());
+        outState.putString(SORTING_CRITERIA_KEY, mSortingCriteria);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         Log.v(TAG, "I'm restoring the data.");
-        mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray("movieList"));
-        mSortingCriteria = savedInstanceState.getString("sortingCriteria");
+        mMovieAdapter.setMovieData((Movie[]) savedInstanceState.getParcelableArray(MOVIE_LIST_KEY));
+        mSortingCriteria = savedInstanceState.getString(SORTING_CRITERIA_KEY);
         super.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -157,7 +156,6 @@ public class MainActivity extends AppCompatActivity
      *                        POPULAR_CRITERIA or RATING_CRITERIA.
      */
     public void loadMoviePosters(String sorting_criteria){
-        // TODO: Implement an Async Task Loader.
         new FetchMovies().execute(sorting_criteria);
     }
 
@@ -197,8 +195,6 @@ public class MainActivity extends AppCompatActivity
         mFavoriteErrorMessageDisplay.setVisibility(View.VISIBLE);
 
     }
-
-
 
 
     /**
@@ -258,9 +254,10 @@ public class MainActivity extends AppCompatActivity
 
 
     /**
-     * 
-     * @param loader
-     * @param data
+     * When the task loader finishes, we convert the data contained in the cursor to an Array of
+     * Movie objects so we can reuse the same layout of the Popular or Rated movie list.
+     * @param loader The task Loader
+     * @param data A cursor with the movies data retrieved from the ContentProvider.
      */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
